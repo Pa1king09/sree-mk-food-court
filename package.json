@@ -7,7 +7,7 @@
   "scripts": {
     "install:all": "npm install --prefix server && npm install --prefix client",
     "seed": "npm --prefix server run seed",
-    "build:client": "npm --prefix client run build",
+    "build:client": "npm --prefix client install && npm --prefix client run build",
     "build": "npm run build:client",
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix client run dev",
