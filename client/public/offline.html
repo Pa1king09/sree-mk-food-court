@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline - Sree MK Food Court</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #0c2419;
+      color: #fcfbf7;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .container {
+      background: #143527;
+      border: 1px solid #ca8a04;
+      border-radius: 1rem;
+      padding: 2rem;
+      max-width: 480px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    h1 {
+      color: #facc15;
+      font-size: 1.75rem;
+      margin-bottom: 0.5rem;
+      font-family: Georgia, serif;
+    }
+    .tagline {
+      color: #ca8a04;
+      font-style: italic;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+    p {
+      color: #eee8d5;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+    .badge {
+      display: inline-block;
+      background: #25654b;
+      color: #fef08a;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+    }
+    .btn {
+      display: inline-block;
+      background: #eab308;
+      color: #071811;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      margin-top: 1rem;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+    .btn:hover {
+      background: #facc15;
+    }
+    .instruction-box {
+      background: #071811;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      text-align: left;
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      border-left: 3px solid #eab308;
+    }
+    .instruction-box ol {
+      margin-left: 1.25rem;
+      margin-top: 0.5rem;
+    }
+    .instruction-box li {
+      margin-bottom: 0.4rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="badge">Offline Notice</div>
+    <h1>Sree MK Food Court</h1>
+    <div class="tagline">Good Food. Good Mood.</div>
+
+    <p>You appear to be disconnected from the restaurant's local Wi-Fi network.</p>
+
+    <button class="btn" onclick="window.location.reload()">Retry Connection</button>
+
+    <div class="instruction-box">
+      <strong>How to reconnect:</strong>
+      <ol>
+        <li>Open your phone's Wi-Fi Settings.</li>
+        <li>Connect to the <strong>Sree MK Food Court</strong> Wi-Fi network.</li>
+        <li>(No internet connection is needed — our local menu runs on the restaurant server).</li>
+        <li>Tap <strong>Retry Connection</strong> above or re-scan the table QR code.</li>
+      </ol>
+    </div>
+  </div>
+</body>
+</html>

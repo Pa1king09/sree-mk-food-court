@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Production builds
+dist/
+client/dist/
+
+# Local databases & uploads
+server/data/
+*.db
+*.sqlite
+uploads_temp/
+
+# Environment files with secrets
+.env
+.env.local
+.env.*.local
+client/.env
+client/.env.local
+server/.env
+server/.env.local
+
+# Logs & temp
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db

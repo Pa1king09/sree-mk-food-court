@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #fef08a 0%, #facc15 50%, #ca8a04 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .border-gold-gradient {
+    border-image: linear-gradient(to right, #a16207, #facc15, #a16207) 1;
+  }
+  .bg-gold-gradient {
+    background: linear-gradient(135deg, #facc15 0%, #eab308 50%, #ca8a04 100%);
+  }
+}
+
+/* Dietary Food Type Indicators (Indian standard veg/non-veg/egg boxes) */
+.food-type-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-width: 2px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.food-type-veg {
+  border-color: #22c55e;
+}
+.food-type-veg::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #22c55e;
+}
+
+.food-type-non-veg {
+  border-color: #ef4444;
+}
+.food-type-non-veg::after {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 8px solid #ef4444;
+}
+
+.food-type-egg {
+  border-color: #eab308;
+}
+.food-type-egg::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #eab308;
+}
+
+/* Print Styles for QR Table Stands & Menus */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .print-card {
+    page-break-inside: avoid;
+    border: 2px solid #333 !important;
+    color: #000 !important;
+    background: #fff !important;
+  }
+}
