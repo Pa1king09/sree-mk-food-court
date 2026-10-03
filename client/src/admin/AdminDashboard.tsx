@@ -25,8 +25,19 @@ import {
   User
 } from 'lucide-react';
 import { MenuItem, Category, RestaurantInfo, FoodType, NetworkInfoResponse } from '../types/menu';
-import { formatPrice } from '../services/menuService';
+import { formatPrice, fetchMenuData } from '../services/menuService';
 import { searchMenuItems } from '../services/searchService';
+import QRCode from 'qrcode';
+import {
+  updateItemAvailability,
+  updateCategoryAvailability,
+  updateBulkAvailability,
+  deleteItem,
+  saveItem,
+  changePassword,
+  changeUsername,
+  logoutAdmin
+} from '../services/adminService';
 
 const POPULAR_ADMIN_SEARCHES = [
   'Chicken Biryani',
@@ -117,9 +128,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const loadData = async () => {
     try {
       setLoading(true);
-      const menuRes = await fetch('/api/menu');
-      const menuData = await menuRes.json();
-      if (menuData.success) {
+      const menuData = await fetchMenuData();
+      if (menuData && menuData.items) {
         setItems(menuData.items);
         setCategories(menuData.categories);
         setRestaurant(menuData.restaurant);
@@ -128,13 +138,35 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         }
       }
 
-      const netRes = await fetch('/api/network-info');
-      const netData = await netRes.json();
-      if (netData.success) {
-        setNetworkInfo(netData);
-      }
+      // Try local network info, or synthesize public URL & QR for Cloudflare Pages
+      try {
+        const netRes = await fetch('/api/network-info');
+        if (netRes.ok) {
+          const netData = await netRes.json();
+          if (netData.success) {
+            setNetworkInfo(netData);
+            return;
+          }
+        }
+      } catch (e) {}
+
+      const publicUrl = import.meta.env.VITE_PUBLIC_URL || (window.location.origin + '/');
+      const qrDataUrl = await QRCode.toDataURL(publicUrl, {
+        width: 320,
+        margin: 2,
+        color: { dark: '#0c2419', light: '#ffffff' }
+      }).catch(() => '');
+
+      setNetworkInfo({
+        success: true,
+        currentIp: window.location.hostname,
+        port: Number(window.location.port) || (window.location.protocol === 'https:' ? 443 : 80),
+        menuUrl: publicUrl,
+        qrDataUrl,
+        availableIps: [{ name: 'Cloud / Public URL', address: publicUrl }]
+      });
     } catch (err: any) {
-      showNotice('error', 'Failed to load menu data from local database');
+      showNotice('error', 'Failed to load menu data');
     } finally {
       setLoading(false);
     }
@@ -214,16 +246,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleToggleAvailability = async (item: MenuItem) => {
     try {
       const newAvail = !item.availability;
-      const res = await fetch(`/api/admin/items/${item.id}/availability`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ availability: newAvail })
-      });
-
-      if (!res.ok) throw new Error('Failed to update availability');
+      const res = await updateItemAvailability(item, newAvail, token);
+      if (!res.success) throw new Error(res.error || 'Failed to update availability');
 
       setItems((prev) =>
         prev.map((it) => (it.id === item.id ? { ...it, availability: newAvail } : it))
@@ -240,17 +264,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     const catName = cat?.name || categoryId;
 
     try {
-      const res = await fetch(`/api/admin/categories/${categoryId}/availability`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ availability: makeAvailable })
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to update category');
+      const res = await updateCategoryAvailability(categoryId, makeAvailable, token);
+      if (!res.success) throw new Error(res.error || 'Failed to update category');
 
       setItems((prev) =>
         prev.map((item) =>
@@ -260,7 +275,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       showNotice(
         'success',
-        `Turned ${makeAvailable ? 'ON' : 'OFF'} all dishes in "${catName}" (${data.updatedCount || 0} items)`
+        `Turned ${makeAvailable ? 'ON' : 'OFF'} all dishes in "${catName}"`
       );
     } catch (err: any) {
       showNotice('error', err.message);
@@ -273,17 +288,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     const idsArray = Array.from(selectedItemIds);
 
     try {
-      const res = await fetch('/api/admin/items/bulk/availability', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ itemIds: idsArray, availability: makeAvailable })
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to update selected items');
+      const res = await updateBulkAvailability(idsArray, makeAvailable, token);
+      if (!res.success) throw new Error(res.error || 'Failed to update selected items');
 
       const idSet = new Set(idsArray);
       setItems((prev) =>
@@ -327,11 +333,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleDeleteItem = async () => {
     if (!deletingItem) return;
     try {
-      const res = await fetch(`/api/admin/items/${deletingItem.id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!res.ok) throw new Error('Failed to delete item');
+      const res = await deleteItem(deletingItem.id, token);
+      if (!res.success) throw new Error(res.error || 'Failed to delete item');
 
       setItems((prev) => prev.filter((it) => it.id !== deletingItem.id));
       showNotice('success', `Deleted "${deletingItem.name}"`);
@@ -365,23 +368,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
 
     try {
-      const url = editingItem ? `/api/admin/items/${editingItem.id}` : '/api/admin/items';
-      const method = editingItem ? 'PUT' : 'POST';
-
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          ...formItem,
-          price: Number(formItem.price)
-        })
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to save item');
+      const res = await saveItem(formItem, Boolean(editingItem), categories, token);
+      if (!res.success) throw new Error(res.error || 'Failed to save item');
 
       showNotice('success', editingItem ? 'Item updated successfully' : 'Item created successfully');
       setEditingItem(null);
@@ -406,20 +394,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
     try {
       setPwLoading(true);
-      const res = await fetch('/api/admin/change-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          currentPassword: pwCurrent,
-          newPassword: pwNew
-        })
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Password update failed');
+      const res = await changePassword(pwNew, pwCurrent, token);
+      if (!res.success) throw new Error(res.error || 'Password update failed');
 
       showNotice('success', 'Admin password successfully changed');
       setPwCurrent('');
@@ -442,28 +418,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
     try {
       setUserLoading(true);
-      const res = await fetch('/api/admin/change-username', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          newUsername: newUsernameInput.trim(),
-          currentPassword: userPwVerify
-        })
-      });
+      const res = await changeUsername(newUsernameInput.trim(), userPwVerify, token);
+      if (!res.success) throw new Error(res.error || 'Failed to update username');
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to update username');
-
-      setCurrentAdminUsername(data.username);
+      setCurrentAdminUsername(newUsernameInput.trim());
       if (onUpdateUsername) {
-        onUpdateUsername(data.username, data.token);
+        onUpdateUsername(newUsernameInput.trim(), res.token);
       }
       setNewUsernameInput('');
       setUserPwVerify('');
-      showNotice('success', data.message || 'Username changed successfully');
+      showNotice('success', 'Username changed successfully');
     } catch (err: any) {
       showNotice('error', err.message);
     } finally {
@@ -471,9 +435,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
-  // JSON Export
+  // JSON Export (works offline and online)
   const handleExportJson = () => {
-    window.location.href = `/api/admin/export?token=${token}`;
+    try {
+      const backupData = {
+        success: true,
+        restaurant,
+        categories,
+        items,
+        count: items.length,
+        exportedAt: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sree_mk_menu_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showNotice('success', 'Menu JSON backup exported successfully');
+    } catch (e: any) {
+      window.location.href = `/api/admin/export?token=${token}`;
+    }
   };
 
   // SQLite DB Backup Download

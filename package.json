@@ -12,6 +12,9 @@
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix client run dev",
     "start": "npm --prefix server run start",
-    "test": "node tests/test-runner.js"
+    "seed:supabase": "node scripts/generate-supabase-seed.js",
+    "test:offline": "node tests/test-runner.js",
+    "test:supabase": "node tests/supabase-migration.test.js",
+    "test": "node tests/test-runner.js && node tests/supabase-migration.test.js"
   }
 }

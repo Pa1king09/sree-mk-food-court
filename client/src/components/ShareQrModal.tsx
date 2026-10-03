@@ -12,8 +12,8 @@ export const ShareQrModal: React.FC<ShareQrModalProps> = ({ onClose }) => {
   const [copied, setCopied] = useState<boolean>(false);
 
   useEffect(() => {
-    // Determine the current window URL
-    const url = window.location.origin + '/';
+    // Determine the current public URL
+    const url = import.meta.env.VITE_PUBLIC_URL || (window.location.origin + '/');
     setCurrentUrl(url);
 
     QRCode.toDataURL(url, {
@@ -83,11 +83,11 @@ export const ShareQrModal: React.FC<ShareQrModalProps> = ({ onClose }) => {
           </button>
         </div>
 
-        {/* Offline notice */}
+        {/* Network & Access notice */}
         <div className="bg-forest-900/80 rounded-lg p-2.5 text-[11px] text-cream-300 text-left border border-forest-800 flex items-start space-x-2">
           <Wifi className="w-4 h-4 text-gold-400 flex-shrink-0 mt-0.5" />
           <p>
-            This QR code points directly to the restaurant laptop's offline Wi-Fi server. No mobile data or internet is required!
+            Scan with any smartphone camera to open the live menu instantly. Works on mobile data or any Wi-Fi connection even when restaurant computers are turned off.
           </p>
         </div>
 
