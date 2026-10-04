@@ -104,8 +104,8 @@ adminRouter.post('/change-username', requireAdminAuth, (req: AuthenticatedReques
       return;
     }
 
-    if (!/^[a-zA-Z0-9_.-]+$/.test(cleanUsername)) {
-      res.status(400).json({ error: 'Username can only contain letters, numbers, underscores, dots, and hyphens' });
+    if (!/^[a-zA-Z0-9_.@-]+$/.test(cleanUsername)) {
+      res.status(400).json({ error: 'Username can only contain letters, numbers, @, underscores, dots, and hyphens' });
       return;
     }
 

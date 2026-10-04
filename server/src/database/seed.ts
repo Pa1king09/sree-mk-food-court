@@ -26,12 +26,15 @@ export function seedMenuData(force = false) {
 
   // Default admin credentials if not set
   const adminCheck = db.prepare('SELECT value FROM settings WHERE key = ?').get('admin_password_hash') as { value: string } | undefined;
-  if (!adminCheck) {
+  const adminUsername = process.env.ADMIN_USERNAME || 'pavan@365';
+  const adminPassword = process.env.ADMIN_PASSWORD || 'pavan365';
+
+  if (!adminCheck || force) {
     const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'sreemk@2026', salt);
+    const hash = bcrypt.hashSync(adminPassword, salt);
     db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('admin_password_hash', hash);
-    db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('admin_username', 'admin');
-    console.log('Default admin initialized: username: admin / password: (set in .env or sreemk@2026)');
+    db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run('admin_username', adminUsername);
+    console.log(`Default admin initialized: username: ${adminUsername} / password: ${adminPassword}`);
   }
 
   // Restaurant details

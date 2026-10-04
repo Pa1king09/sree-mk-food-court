@@ -141,9 +141,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       // Try local network info, or synthesize public URL & QR for Cloudflare Pages
       try {
         const netRes = await fetch('/api/network-info');
-        if (netRes.ok) {
-          const netData = await netRes.json();
-          if (netData.success) {
+        const contentType = netRes.headers.get('content-type') || '';
+        if (netRes.ok && contentType.includes('application/json')) {
+          const netData = await netRes.json().catch(() => null);
+          if (netData?.success) {
             setNetworkInfo(netData);
             return;
           }
@@ -477,20 +478,42 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return;
       }
 
-      const res = await fetch('/api/admin/import', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: text
-      });
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        const res = await fetch('/api/admin/import', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: text
+        });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Import failed');
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const data = await res.json().catch(() => null);
+          if (res.ok && data?.success) {
+            showNotice('success', data.message || 'Menu imported successfully');
+            loadData();
+            return;
+          }
+        }
+      }
 
-      showNotice('success', data.message || 'Menu imported successfully');
-      loadData();
+      if (parsed.items && Array.isArray(parsed.items)) {
+        localStorage.setItem(
+          'sree_mk_cached_menu_data',
+          JSON.stringify({
+            success: true,
+            restaurant: parsed.restaurant || restaurant,
+            categories: parsed.categories || categories,
+            items: parsed.items,
+            count: parsed.items.length,
+            lastUpdated: new Date().toISOString()
+          })
+        );
+        showNotice('success', `Successfully imported ${parsed.items.length} items`);
+        loadData();
+      }
     } catch (err: any) {
       showNotice('error', `Import error: ${err.message}`);
     }
