@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sree MK Food Court - Table Menu QR Card</title>
+  <style>
+    @page {
+      size: A5 portrait;
+      margin: 0;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #061811;
+      color: #fcfbf7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .card {
+      width: 480px;
+      background: linear-gradient(180deg, #0c2b1e 0%, #071912 100%);
+      border: 3px solid #d4af37;
+      border-radius: 28px;
+      padding: 36px 28px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      position: relative;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      border-radius: 20px;
+      pointer-events: none;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid #d4af37;
+      border-radius: 20px;
+      color: #f6d365;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    h1 {
+      font-family: Georgia, 'Playfair Display', serif;
+      font-size: 26px;
+      color: #f6d365;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .tagline {
+      font-size: 13px;
+      color: #a4c4b5;
+      letter-spacing: 1.5px;
+      margin-bottom: 22px;
+      text-transform: uppercase;
+    }
+    .qr-container {
+      background: #ffffff;
+      padding: 18px;
+      border-radius: 20px;
+      display: inline-block;
+      border: 3px solid #d4af37;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      margin-bottom: 20px;
+    }
+    .qr-img {
+      width: 250px;
+      height: 250px;
+      display: block;
+    }
+    .instruction {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+    .sub-instruction {
+      font-size: 12px;
+      color: #8dafa0;
+      margin-bottom: 18px;
+      line-height: 1.4;
+    }
+    .url-pill {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-family: monospace;
+      font-size: 12px;
+      color: #f3e5ab;
+      word-break: break-all;
+    }
+    .footer {
+      margin-top: 18px;
+      font-size: 10px;
+      color: #6d8e7f;
+      letter-spacing: 1px;
+    }
+    .no-print-bar {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+    }
+    .btn {
+      padding: 10px 18px;
+      background: #d4af37;
+      color: #071912;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    @media print {
+      body {
+        background: none;
+        padding: 0;
+      }
+      .no-print-bar {
+        display: none;
+      }
+      .card {
+        box-shadow: none;
+        width: 100%;
+        max-width: 500px;
+        margin: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print-bar">
+    <button class="btn" onclick="window.print()">🖨️ Print Table Stand Card</button>
+  </div>
+
+  <div class="card">
+    <div class="badge">✨ Digital Dining Experience</div>
+    <h1>Sree MK Food Court</h1>
+    <div class="tagline">Good Food. Good Mood.</div>
+
+    <div class="qr-container">
+      <img src="data:image/png;base64,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" alt="Menu QR Code" class="qr-img" />
+    </div>
+
+    <div class="instruction">Scan with any Camera / QR App</div>
+    <div class="sub-instruction">
+      Browse our complete menu &amp; calculate your table order instantly.<br/>
+      Works on Mobile Data or Restaurant Wi-Fi!
+    </div>
+
+    <div class="url-pill">
+      https://sree-mk-food-court.npavansooth.workers.dev
+    </div>
+
+    <div class="footer">
+      SREE MK FOOD COURT RESTAURANT • 240 VERIFIED DELICACIES
+    </div>
+  </div>
+</body>
+</html>
