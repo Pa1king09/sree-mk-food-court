@@ -66,11 +66,11 @@ const familyPack = initialMenu.items.find(i => i.id === 'biryani-nv-4');
 assert(familyPack && seedSql.includes(`'biryani-nv-4'`), 'Family Pack Chicken Biryani (4pcs) present in seed SQL');
 assert(familyPack && seedSql.includes(`${familyPack.price}`), `Exact price ₹${familyPack?.price} preserved in seed SQL`);
 
-// 4. Cloudflare Pages Configuration
-const redirectsPath = path.join(root, 'client/public/_redirects');
-assert(fs.existsSync(redirectsPath), 'Cloudflare Pages _redirects file exists');
-const redirectsContent = fs.readFileSync(redirectsPath, 'utf8');
-assert(redirectsContent.includes('/* /index.html 200'), 'Cloudflare Pages SPA routing configured (/* /index.html 200)');
+// 4. Cloudflare Deployment Configuration
+const wranglerPath = path.join(root, 'wrangler.jsonc');
+assert(fs.existsSync(wranglerPath), 'Cloudflare wrangler.jsonc configuration exists');
+const wranglerContent = fs.readFileSync(wranglerPath, 'utf8');
+assert(wranglerContent.includes('single-page-application'), 'Cloudflare SPA routing configured (single-page-application)');
 
 // 5. Environment Variables Documentation
 const envExamplePath = path.join(root, 'client/.env.example');
