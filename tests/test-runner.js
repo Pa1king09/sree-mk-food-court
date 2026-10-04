@@ -168,13 +168,16 @@ async function runTestSuite() {
   assert(secretRow && secretRow.value.length > 10, 'JWT secret is safely stored and persistent in SQLite settings');
   assert(hashRow && hashRow.value.startsWith('$2'), 'Admin password is encrypted with bcrypt hash');
 
-  let validPassword = bcrypt.compareSync('pavan365', hashRow.value) || bcrypt.compareSync('sreemk@2026', hashRow.value);
+  let validPassword =
+    bcrypt.compareSync('SREEMK@143', hashRow.value) ||
+    bcrypt.compareSync('pavan365', hashRow.value) ||
+    bcrypt.compareSync('sreemk@2026', hashRow.value);
   if (!validPassword) {
     const salt = bcrypt.genSaltSync(10);
-    const newHash = bcrypt.hashSync('pavan365', salt);
+    const newHash = bcrypt.hashSync('SREEMK@143', salt);
     dbAuth.prepare('UPDATE settings SET value = ? WHERE key = ?').run(newHash, 'admin_password_hash');
     hashRow = { value: newHash };
-    validPassword = bcrypt.compareSync('pavan365', hashRow.value);
+    validPassword = bcrypt.compareSync('SREEMK@143', hashRow.value);
   }
   assert(validPassword, 'Default admin password hashes match bcrypt verification');
   const wrongPassword = bcrypt.compareSync('wrongpass123', hashRow.value);

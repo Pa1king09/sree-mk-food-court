@@ -26,8 +26,8 @@ export function seedMenuData(force = false) {
 
   // Default admin credentials if not set
   const adminCheck = db.prepare('SELECT value FROM settings WHERE key = ?').get('admin_password_hash') as { value: string } | undefined;
-  const adminUsername = process.env.ADMIN_USERNAME || 'pavan@365';
-  const adminPassword = process.env.ADMIN_PASSWORD || 'pavan365';
+  const adminUsername = process.env.ADMIN_USERNAME || 'SREE_MK';
+  const adminPassword = process.env.ADMIN_PASSWORD || 'SREEMK@143';
 
   if (!adminCheck || force) {
     const salt = bcrypt.genSaltSync(10);

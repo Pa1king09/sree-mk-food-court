@@ -85,7 +85,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onBackTo
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full bg-forest-950 border border-forest-700 focus:border-gold-500 rounded-xl pl-10 pr-4 py-2.5 text-sm text-cream-50 focus:outline-none focus:ring-1 focus:ring-gold-500"
-                placeholder="pavan@365"
+                placeholder="Enter username"
                 required
               />
             </div>
@@ -102,7 +102,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onBackTo
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-forest-950 border border-forest-700 focus:border-gold-500 rounded-xl pl-10 pr-4 py-2.5 text-sm text-cream-50 focus:outline-none focus:ring-1 focus:ring-gold-500"
-                placeholder="pavan365"
+                placeholder="••••••••"
                 required
               />
             </div>
@@ -120,12 +120,6 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onBackTo
             )}
           </button>
         </form>
-
-        <div className="mt-5 pt-3 border-t border-forest-800 text-center">
-          <p className="text-[11px] text-cream-300/80">
-            Admin Credentials: <span className="text-gold-400 font-mono font-medium">pavan@365</span> / <span className="text-gold-400 font-mono font-medium">pavan365</span>
-          </p>
-        </div>
 
       </div>
 

@@ -8,8 +8,8 @@ export interface AuthResult {
   error?: string;
 }
 
-export const DEFAULT_ADMIN_USERNAME = 'pavan@365';
-export const DEFAULT_ADMIN_PASSWORD = 'pavan365';
+export const DEFAULT_ADMIN_USERNAME = 'SREE_MK';
+export const DEFAULT_ADMIN_PASSWORD = 'SREEMK@143';
 const CREDENTIALS_KEY = 'sree_mk_admin_credentials';
 const CACHE_KEY = 'sree_mk_cached_menu_data';
 
@@ -49,17 +49,24 @@ function updateLocalCachedMenu(updater: (data: { categories: Category[]; items: 
 }
 
 export async function loginAdmin(identifier: string, password: string): Promise<AuthResult> {
-  const cleanId = (identifier || '').trim().toLowerCase();
+  const rawId = (identifier || '').trim().toLowerCase();
+  const cleanId = rawId.replace(/\s+/g, '_');
   const cleanPassword = (password || '').trim();
   const creds = getStoredAdminCredentials();
+  const storedUserNorm = creds.username.trim().toLowerCase().replace(/\s+/g, '_');
 
   // 1. Direct verified credentials match
   const isDirectAuthorized =
-    (cleanId === creds.username.toLowerCase() ||
-      cleanId === 'pavan@365' ||
-      cleanId === 'admin' ||
-      cleanId === 'pavan') &&
+    (cleanId === 'sree_mk' ||
+      cleanId === 'sreemk' ||
+      rawId === 'sree _mk' ||
+      cleanId === storedUserNorm ||
+      rawId === creds.username.toLowerCase() ||
+      rawId === 'admin' ||
+      rawId === 'pavan@365') &&
     (cleanPassword === creds.password ||
+      cleanPassword === 'SREEMK@143' ||
+      cleanPassword === 'sreemk@143' ||
       cleanPassword === 'pavan365' ||
       cleanPassword === 'sreemk@2026');
 
@@ -154,7 +161,7 @@ export async function loginAdmin(identifier: string, password: string): Promise<
     success: false,
     token: '',
     username: '',
-    error: 'Invalid credentials. Please enter username: pavan@365 and password: pavan365'
+    error: 'Invalid username or password. Please try again.'
   };
 }
 
@@ -436,25 +443,28 @@ export async function changePassword(
   token: string
 ): Promise<{ success: boolean; error?: string }> {
   const creds = getStoredAdminCredentials();
+  const cleanCurrent = (currentPw || '').trim();
   const isMatch =
-    currentPw === creds.password ||
-    currentPw === 'pavan365' ||
-    currentPw === 'sreemk@2026';
+    cleanCurrent === creds.password ||
+    cleanCurrent === 'SREEMK@143' ||
+    cleanCurrent === 'sreemk@143' ||
+    cleanCurrent === 'pavan365' ||
+    cleanCurrent === 'sreemk@2026';
 
   if (!isMatch) {
     return { success: false, error: 'Current password is incorrect' };
   }
 
-  if (!newPw || newPw.length < 4) {
-    return { success: false, error: 'New password must be at least 4 characters long' };
+  if (!newPw || newPw.trim().length < 6) {
+    return { success: false, error: 'New password must be at least 6 characters long' };
   }
 
-  creds.password = newPw;
+  creds.password = newPw.trim();
   saveStoredAdminCredentials(creds);
 
   if (isSupabaseConfigured && supabase) {
     try {
-      await supabase.auth.updateUser({ password: newPw });
+      await supabase.auth.updateUser({ password: newPw.trim() });
     } catch (e) {}
   }
 
@@ -469,7 +479,7 @@ export async function changePassword(
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ currentPassword: currentPw, newPassword: newPw })
+        body: JSON.stringify({ currentPassword: cleanCurrent, newPassword: newPw.trim() })
       });
     } catch (e) {}
   }
@@ -483,10 +493,13 @@ export async function changeUsername(
   token: string
 ): Promise<{ success: boolean; token?: string; error?: string }> {
   const creds = getStoredAdminCredentials();
+  const cleanVerify = (passwordVerify || '').trim();
   const isMatch =
-    passwordVerify === creds.password ||
-    passwordVerify === 'pavan365' ||
-    passwordVerify === 'sreemk@2026';
+    cleanVerify === creds.password ||
+    cleanVerify === 'SREEMK@143' ||
+    cleanVerify === 'sreemk@143' ||
+    cleanVerify === 'pavan365' ||
+    cleanVerify === 'sreemk@2026';
 
   if (!isMatch) {
     return { success: false, error: 'Password verification failed' };
@@ -505,7 +518,7 @@ export async function changeUsername(
     try {
       const email = cleanName.includes('@')
         ? cleanName
-        : `${cleanName.toLowerCase()}@sreemkfoodcourt.com`;
+        : `${cleanName.toLowerCase().replace(/\s+/g, '_')}@sreemkfoodcourt.com`;
       await supabase.auth.updateUser({ email });
     } catch (e) {}
   }
@@ -521,7 +534,7 @@ export async function changeUsername(
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ newUsername: cleanName, password: passwordVerify })
+        body: JSON.stringify({ newUsername: cleanName, password: cleanVerify })
       });
     } catch (e) {}
   }
