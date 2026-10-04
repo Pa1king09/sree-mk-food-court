@@ -196,10 +196,13 @@ export async function updateItemAvailability(
         .eq('id', item.id);
 
       if (error) {
-        console.warn('Supabase availability update note:', error.message);
+        console.error('Supabase availability update error:', error.message);
+        return { success: false, error: error.message };
       }
-    } catch (e) {
-      console.warn('Supabase sync note:', e);
+      console.log(`[Supabase] Successfully updated "${item.name}" availability to ${newAvail}`);
+    } catch (e: any) {
+      console.error('Supabase sync exception:', e);
+      return { success: false, error: e?.message || 'Database update failed' };
     }
   }
 
@@ -245,10 +248,17 @@ export async function updateCategoryAvailability(
         .eq('category_id', categoryId)
         .select('id');
 
-      if (!error && data) {
+      if (error) {
+        console.error('Supabase category availability error:', error.message);
+        return { success: false, error: error.message };
+      }
+      if (data) {
         count = data.length;
       }
-    } catch (e) {}
+    } catch (e: any) {
+      console.error('Supabase category update exception:', e);
+      return { success: false, error: e?.message || 'Category update failed' };
+    }
   }
 
   if (
@@ -294,10 +304,17 @@ export async function updateBulkAvailability(
         .in('id', itemIds)
         .select('id');
 
-      if (!error && data) {
+      if (error) {
+        console.error('Supabase bulk availability error:', error.message);
+        return { success: false, error: error.message };
+      }
+      if (data) {
         count = data.length;
       }
-    } catch (e) {}
+    } catch (e: any) {
+      console.error('Supabase bulk update exception:', e);
+      return { success: false, error: e?.message || 'Bulk update failed' };
+    }
   }
 
   if (

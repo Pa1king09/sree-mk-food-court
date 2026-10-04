@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sree-mk-menu-v2';
+const CACHE_NAME = 'sree-mk-menu-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -14,13 +14,13 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[ServiceWorker] Pre-caching offline shell');
+      console.log('[ServiceWorker] Pre-caching offline shell v3');
       return cache.addAll(STATIC_ASSETS);
     }).then(() => self.skipWaiting())
   );
 });
 
-// Activate: clean up outdated caches
+// Activate: clean up outdated caches immediately and claim clients
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keyList) => {
@@ -41,7 +41,32 @@ self.addEventListener('fetch', (event) => {
   const request = event.request;
   const url = new URL(request.url);
 
-  // For API calls (like /api/menu): Network-First, with cache fallback
+  // Do not intercept non-GET requests or admin modification requests
+  if (request.method !== 'GET') {
+    return;
+  }
+
+  // 1. For HTML navigation requests (opening or refreshing the page):
+  // ALWAYS try network first so users and admin immediately see the latest live deployment!
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          console.log('[ServiceWorker] Offline navigation: serving cached index.html or offline fallback');
+          return caches.match('/index.html').then((cached) => cached || caches.match('/offline.html'));
+        })
+    );
+    return;
+  }
+
+  // 2. For API calls (like /api/menu): Network-First, with cache fallback
   if (url.pathname.startsWith('/api/menu')) {
     event.respondWith(
       fetch(request)
@@ -65,12 +90,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Do not intercept non-GET requests or admin modification requests
-  if (request.method !== 'GET') {
-    return;
-  }
-
-  // Static assets & navigation: Cache-First with Network fallback & cache update
+  // 3. Static assets: Cache-First with Network fallback & cache update
   event.respondWith(
     caches.match(request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -95,7 +115,6 @@ self.addEventListener('fetch', (event) => {
           return networkResponse;
         })
         .catch(() => {
-          // If navigational request fails offline, return offline fallback page
           if (request.mode === 'navigate') {
             return caches.match('/offline.html');
           }
